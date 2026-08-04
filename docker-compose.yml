@@ -7,9 +7,9 @@ services:
     restart: unless-stopped
 
     environment:
-      POSTGRES_USER: estoque_user
-      POSTGRES_PASSWORD: estoque_password
-      POSTGRES_DB: estoque_db
+      POSTGRES_USER: stock_user
+      POSTGRES_PASSWORD: stock_123456
+      POSTGRES_DB: stock_db
 
     ports:
       - "5432:5432"

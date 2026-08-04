@@ -13,10 +13,6 @@ datasource db {
 }
 
 
-
-
-
-
 model Company {
   id         String   @id @default(cuid())
   name       String
@@ -42,6 +38,8 @@ model Company {
   units      Unit[]
   suppliers  Supplier[]
   products   Product[]
+  inventoryMovements InventoryMovement[]
+  stocks     Stock[]
 
 }
 
@@ -66,6 +64,7 @@ model Warehouse {
   street       String?
   number       String?
   complement   String?
+  //neighborhood String?
   city         String?
   state        String?
   zipCode      String?
@@ -76,6 +75,7 @@ model Warehouse {
   company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   inventoryMovements InventoryMovement[]
+  stocks             Stock[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -146,6 +146,7 @@ model Unit {
   updatedAt   DateTime @updatedAt
 
   @@unique([companyId, name])
+  @@unique([companyId, abbreviation])
   @@index([companyId])
 }
 
@@ -162,6 +163,7 @@ model Supplier {
   company      Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   products    Product[]
+  inventoryMovements InventoryMovement[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -169,16 +171,6 @@ model Supplier {
   @@unique([companyId, name])
   @@index([companyId])
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -191,9 +183,8 @@ model Product {
 
   description String?
 
-  minimumStock Int      @default(0)
-  purchaseCost Decimal? @db.Decimal(10, 2)
-  salePrice Decimal @db.Decimal(10,2)
+  salePrice   Decimal  @db.Decimal(10,2)
+  minimumStock Decimal @default(0) @db.Decimal(10,3)
 
   isActive    Boolean   @default(true)
 
@@ -219,6 +210,7 @@ model Product {
 
 
   inventoryMovements InventoryMovement[]
+  stocks             Stock[]
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -230,15 +222,31 @@ model Product {
   @@index([categoryId])
 }
 
+enum MovementType {
+  ENTRY
+  EXIT
+  TRANSFER_IN
+  TRANSFER_OUT
+  ADJUSTMENT
+}
 model InventoryMovement {
   id           String   @id @default(cuid())
 
-  movementDate DateTime @default(now())
-  type         String
+  
 
-  quantity     Int
+  // userId String?
+
+  movementDate DateTime @default(now())
+  type MovementType
+
+  quantity     Decimal @db.Decimal(10, 3)
   purchaseCost Decimal? @db.Decimal(10, 2)
   salePrice    Decimal? @db.Decimal(10, 2)
+
+  notes String?
+
+  // Agrupa movimentações de transferência (TRANSFER_IN / TRANSFER_OUT do mesmo par)
+  transferGroupId String?
 
   unitId       String
   unit         Unit     @relation(fields: [unitId], references: [id])
@@ -249,10 +257,39 @@ model InventoryMovement {
   warehouseId  String
   warehouse    Warehouse @relation(fields: [warehouseId], references: [id])
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  companyId String
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  @@index([productId])
+  supplierId String?
+  supplier Supplier? @relation(fields: [supplierId], references: [id])
+
+  createdAt    DateTime @default(now())
+
+  @@index([companyId, movementDate, warehouseId, productId])
+  @@index([transferGroupId])
+}
+
+
+
+model Stock {
+  id String @id @default(cuid())
+
+  quantity Decimal @default(0) @db.Decimal(10, 3)
+
+  productId String
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  warehouseId String
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+
+  companyId String
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([warehouseId, productId])
+  @@index([companyId])
   @@index([warehouseId])
-  @@index([movementDate])
+  @@index([productId])
 }

@@ -38,44 +38,54 @@ const CATEGORIES = ["Todas", "Móveis", "Eletrônicos", "Casa"];
 const STATUS_FILTERS = ["Todos", "Normal", "Baixo", "Crítico", "Esgotado"];
 
 export function ProductsContent() {
-  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
+  const [products] = useState<Product[]>(INITIAL_PRODUCTS);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("Todas");
   const [statusFilter, setStatusFilter] = useState<string>("Todos");
 
-  const filtered = products.filter((p) => {
-      const q = search.trim().toLowerCase();
-      if (q) {
-        const inName = p.name?.toLowerCase().includes(q);
-        const inSku = p.sku?.toLowerCase().includes(q);
-        const inBarcode = p.barcode?.toLowerCase().includes(q);
-        if (!inName && !inSku && !inBarcode) return false;
-      }
-      if (categoryFilter !== "Todas" && p.category !== categoryFilter)
-        return false;
-      // status is not part of Product here; skip statusFilter logic for now
-      return true;
-    });
+  const filtered = useMemo(
+    () =>
+      products.filter((p) => {
+        const q = search.trim().toLowerCase();
+        if (q) {
+          const inName = p.name?.toLowerCase().includes(q);
+          const inSku = p.sku?.toLowerCase().includes(q);
+          const inBarcode = p.barcode?.toLowerCase().includes(q);
+          if (!inName && !inSku && !inBarcode) return false;
+        }
+        if (categoryFilter !== "Todas" && p.category !== categoryFilter)
+          return false;
+        return true;
+      }),
+    [products, search, categoryFilter]
+  );
 
   return (
     <div className="space-y-4">
-      <div className="bg-primary/10 rounded-xl  p-4 space-y-3">
+      <div>
+        <h2 className="text-xl font-semibold sm:text-2xl">Produtos</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Gerencie seu catálogo de produtos.
+        </p>
+      </div>
+
+      <div className="rounded-xl border border-border bg-muted/30 p-4 space-y-3">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar por nome, SKU, código de barras..."
-              className="w-full pl-9 pr-4 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
+              className="w-full pl-9 pr-4 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
             />
           </div>
           <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
+            <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-3 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
+              className="px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
             >
               {CATEGORIES.map((c) => (
                 <option key={c} value={c}>
@@ -86,7 +96,7 @@ export function ProductsContent() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
+              className="px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
             >
               {STATUS_FILTERS.map((s) => (
                 <option key={s} value={s}>
@@ -110,7 +120,7 @@ export function ProductsContent() {
                 setCategoryFilter("Todas");
                 setStatusFilter("Todos");
               }}
-              className="text-primary hover:underline text-xs"
+              className="text-primary hover:underline text-xs font-medium"
             >
               Limpar filtros
             </button>
@@ -118,7 +128,7 @@ export function ProductsContent() {
         </div>
       </div>
 
-      <div className="bg-primary/10 rounded-xl  overflow-hidden">
+      <div className="rounded-xl border border-border bg-muted/30 overflow-hidden">
         <ProductsTable data={filtered} />
       </div>
     </div>

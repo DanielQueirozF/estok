@@ -293,3 +293,58 @@ Registrar entradas, saídas, transferências e ajustes de estoque.
 Manter o saldo atualizado em tempo real.
 Disponibilizar consultas rápidas e confiáveis do estoque.
 Preservar todo o histórico de movimentações para auditoria e evolução futura do sistema.
+
+
+
+
+
+
+
+
+Cadastrar Produto
+
+Nome: Coca-Cola 2L
+SKU: 789123456
+Categoria: Bebidas
+
+↓
+
+Produto criado com sucesso
+
+↓
+
+Estoque Inicial = 0
+
+
+
+
+Dashboard
+│
+├── KPIs
+├── Alertas
+├── Últimas movimentações
+└── Gráficos
+
+Estoque
+│
+├── Lista de produtos no estoque (Com botão de criar novo produto, excluir, alertas de estoque minimo)
+└── Filtros (o filtro já é uma consulta)
+
+Movimentações
+│
+└── Histórico (Com filtros de saida, entrada, transferências ou tudo)
+
+Cadastros ---
+│
+├── Armazéns
+├── Usuários
+├── Categorias
+├── Fornecedores
+└── Unidades (de contagem UN, CX, KG, Pallet, Fardos, etc)
+
+
+Configurações
+│
+├── Empresa
+├── Preferências
+└── Perfil
